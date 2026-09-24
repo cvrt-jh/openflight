@@ -3340,12 +3340,16 @@ def _finalize_shot_detected(
             context={"stage": f"emit_{emit_event}", "ball_speed_mph": shot.ball_speed_mph},
             exc=e,
         )
+        # The trajectory is only needed for the send; the session keeps every Shot.
+        shot.committed_flight = None
         return
 
-    # Forward to simulator connectors (optional)
-    _forward_shot_to_simulators(shot)
-    # The trajectory is only needed for the send; the session keeps every Shot.
-    shot.committed_flight = None
+    # Forward to simulator connectors (optional). The trajectory is only
+    # needed for the send; always drop it after, even if the forward raises.
+    try:
+        _forward_shot_to_simulators(shot)
+    finally:
+        shot.committed_flight = None
 
     # Debug logging (optional)
     if debug_mode:

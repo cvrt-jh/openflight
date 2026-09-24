@@ -4763,11 +4763,46 @@ class TestBallisticCarryPrecedence:
     def test_table_fallback_has_no_committed_flight(self, monkeypatch):
         monkeypatch.setattr(server_module, "ballistics_enabled", True)
         monkeypatch.setattr(server_module, "_ensure_user_facing_launch_angles", lambda _shot: None)
+        forwarded = []
+
+        def _resolve_at_send(sent):
+            forwarded.append(server_module.resolve_shot(sent, server_module.SimPlayerState()))
+
+        monkeypatch.setattr(server_module, "_forward_shot_to_simulators", _resolve_at_send)
         shot = self._shot(launch_angle=None, prefilled_carry=None)
 
         server_module._finalize_shot_detected(shot, emit_event="shot")
 
+        [resolved] = forwarded
+        assert resolved.flight is None
         assert shot.carry_spin_adjusted is not None
+        assert shot.committed_flight is None
+
+    def test_committed_flight_dropped_when_forward_raises(self, monkeypatch):
+        monkeypatch.setattr(server_module, "ballistics_enabled", True)
+
+        def _boom(_sent):
+            raise RuntimeError("connector exploded")
+
+        monkeypatch.setattr(server_module, "_forward_shot_to_simulators", _boom)
+        shot = self._shot(launch_angle=19.1, prefilled_carry=None)
+
+        with pytest.raises(RuntimeError, match="connector exploded"):
+            server_module._finalize_shot_detected(shot, emit_event="shot")
+
+        assert shot.committed_flight is None
+
+    def test_committed_flight_dropped_when_emit_raises(self, monkeypatch):
+        monkeypatch.setattr(server_module, "ballistics_enabled", True)
+        monkeypatch.setattr(
+            server_module.socketio,
+            "emit",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("emit exploded")),
+        )
+        shot = self._shot(launch_angle=19.1, prefilled_carry=None)
+
+        server_module._finalize_shot_detected(shot, emit_event="shot")
+
         assert shot.committed_flight is None
 
     def test_committed_flight_is_never_serialized(self):
