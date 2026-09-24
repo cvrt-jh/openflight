@@ -63,6 +63,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to the [PAR-TEE](https://playpartee.com) iPhone app over OpenConnect V1 on the
   phone's Wi-Fi address (port 921 by default). Same shared codec as GSPro and
   OpenGolfSim; the header pill and "Sent to" panel read PAR-TEE.
+- **OpenFlight Range connector.** `"type": "openflight-range"` in
+  `config/sim.json` streams shots to OpenFlight Range, a desktop driving-range
+  visualizer, over its own newline-delimited JSON protocol (port 3200 by
+  default, heartbeat every 5 s). Each shot carries OpenFlight's committed
+  carry and flight path, so the range draws the same carry the kiosk shows. See
+  [OpenFlight Range](using/simulator/openflight-range.md).
 - **Profiles replace players.** Shots are now attributed to a server-owned profile
   (a person *or* a place) with a stable id, persisted to
   `~/.config/openflight/profiles.json` (override with `OPENFLIGHT_PROFILES_PATH`

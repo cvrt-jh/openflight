@@ -39,12 +39,12 @@ cp config/sim.example.json config/sim.json
 
 | Key | Meaning |
 | --- | --- |
-| `type` | Connector to use — `opengolfsim`, `gspro`, `partee` |
+| `type` | Connector to use: `opengolfsim`, `gspro`, `partee`, `openflight-range` |
 | `enabled` | Whether this connector is active |
-| `host`, `port` | Where the simulator is listening |
+| `host`, `port` | Where the simulator is listening (default port: `gspro` 921, `opengolfsim` 3111, `partee` 921, `openflight-range` 3200) |
 | `device_id` | Identifier the simulator displays |
-| `units` | `Yards` or `Meters` (GSPro) |
-| `heartbeat_interval_s` | Keepalive cadence (GSPro) |
+| `units` | `Yards` or `Meters` (GSPro, OpenFlight Range) |
+| `heartbeat_interval_s` | Keepalive cadence in seconds (default 5; OpenFlight Range drops a connection that is silent for 15 s) |
 
 Enable connectors at runtime with `--sim`. See
 [simulator connectors](../using/simulator/index.md).

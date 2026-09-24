@@ -11,6 +11,7 @@ Supported simulators:
 - [GSPro](gspro.md) (OpenConnectV1)
 - [OpenGolfSim](opengolfsim.md)
 - [PAR-TEE](partee.md)
+- [OpenFlight Range](openflight-range.md)
 
 This document explains how the connector layer works and how to add a new
 simulator. For setting up a specific simulator, see its page above.
