@@ -132,6 +132,12 @@ class OpenFlightRangeCodec:
                 "speed_mps": round(flight.trajectory.landing_speed_mph * MPH_TO_MPS, 2),
                 "angle_deg": round(flight.trajectory.landing_angle_deg, 1),
             }
+        # No special case for result.carry_yd: if resolved.carry_yards is itself
+        # non-finite, this sweep sends it as null on purpose. The range treats a
+        # null carry as a protocol warning, visible on the HUD, which is the right
+        # outcome here - carry normally comes straight from the committed
+        # simulate() result or the resolver's fallback table, so a non-finite
+        # value here means the physics broke, not that a field is merely unknown.
         sanitized_keys: List[str] = []
         _sanitize_scalars(message, resolved.shot_number, sanitized_keys)
         if sanitized_keys:

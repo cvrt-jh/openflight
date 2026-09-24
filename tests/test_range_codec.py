@@ -214,3 +214,19 @@ def test_sanitizing_nonfinite_values_logs_a_warning_naming_the_shot(caplog):
 def test_finite_shot_produces_strict_json():
     msg = _strict_json_loads(OpenFlightRangeCodec().build_shot(_resolved(_flight())))
     assert msg["type"] == "shot"
+
+
+def test_nonfinite_carry_is_sent_as_null_on_purpose(caplog):
+    # A non-finite carry means the physics broke, not that the field is unknown;
+    # the sanitizer sends it as null on purpose so the range surfaces a visible
+    # HUD warning rather than silently dropping the whole shot.
+    resolved = _resolved(_flight(), carry_yards=float("nan"))
+    with caplog.at_level("WARNING"):
+        raw = OpenFlightRangeCodec().build_shot(resolved)
+    msg = _strict_json_loads(raw)
+    assert msg["result"]["carry_yd"] is None
+    assert msg["shot_number"] == resolved.shot_number
+    assert msg["session_uuid"]
+    assert any(
+        "[sim]" in r.message and str(resolved.shot_number) in r.message for r in caplog.records
+    )
