@@ -22,6 +22,14 @@ describe('SimStatus', () => {
     expect(html).toContain('sim-status__pill--warn'); // reconnecting
   });
 
+  it('shows the OpenFlight Range display name when connected', () => {
+    const statuses: Record<string, SimStatusData> = {
+      'openflight-range': { target: 'openflight-range', state: 'connected', host: '192.168.1.60', port: 3200 },
+    };
+    const html = renderToString(<SimStatus statuses={statuses} />);
+    expect(html).toContain('OpenFlight Range');
+  });
+
   it('marks error state with the error severity class', () => {
     const statuses: Record<string, SimStatusData> = {
       gspro: { target: 'gspro', state: 'error', message: 'Connection refused' },

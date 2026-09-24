@@ -52,6 +52,15 @@ def test_partee_default_port(tmp_path):
     assert load_sim_config(config_path=p)[0].port == 921
 
 
+def test_openflight_range_default_port_and_heartbeat(tmp_path):
+    path = tmp_path / "sim.json"
+    path.write_text(json.dumps({"connectors": [{"type": "openflight-range", "enabled": True}]}))
+    (cfg,) = load_sim_config(path)
+    assert cfg.type == "openflight-range"
+    assert cfg.port == 3200
+    assert cfg.heartbeat_interval_s == 5.0
+
+
 def test_explicit_port_overrides_default(tmp_path):
     p = _write(tmp_path, {"connectors": [
         {"type": "opengolfsim", "enabled": True, "host": "192.168.1.9", "port": 9000},

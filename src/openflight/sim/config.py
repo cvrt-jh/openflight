@@ -7,6 +7,8 @@ A connector's ``type`` is the *product*: gspro (OpenConnect V1 on 921),
 opengolfsim (reached via its Developer API on 3111, which speaks OpenConnect),
 or partee (the PAR-TEE phone app, which listens for OpenConnect on 921).
 All ride the shared OpenConnect codec; they differ only in name + default port.
+openflight-range (OpenFlight Range, the desktop range visualizer, on 3200) uses
+its own codec because it also needs the flight path.
 """
 
 import json
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = Path("config/sim.json")
 
-KNOWN_TYPES: Tuple[str, ...] = ("gspro", "opengolfsim", "partee")
+KNOWN_TYPES: Tuple[str, ...] = ("gspro", "opengolfsim", "partee", "openflight-range")
 
 # Per-type defaults applied when a field is absent from the file.
 _DEFAULTS: Dict[str, dict] = {
@@ -37,6 +39,12 @@ _DEFAULTS: Dict[str, dict] = {
     },
     "partee": {
         "port": 921,
+        "units": "Yards",
+        "device_id": "OpenFlight",
+        "heartbeat_interval_s": 5.0,
+    },
+    "openflight-range": {
+        "port": 3200,
         "units": "Yards",
         "device_id": "OpenFlight",
         "heartbeat_interval_s": 5.0,

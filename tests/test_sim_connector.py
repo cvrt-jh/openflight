@@ -156,6 +156,17 @@ def test_build_connector_partee_uses_shared_codec_named_partee():
     assert c.name == "partee"
 
 
+def test_build_connector_openflight_range_uses_range_codec():
+    from openflight.range.codec import OpenFlightRangeCodec
+
+    connector = build_connector(
+        ConnectorConfig(type="openflight-range", enabled=True, host="192.168.1.60", port=3200)
+    )
+    assert isinstance(connector.codec, OpenFlightRangeCodec)
+    assert connector.name == "openflight-range"
+    assert connector.port == 3200
+
+
 def test_build_connector_unknown_type_raises():
     with pytest.raises(ValueError):
         build_connector(ConnectorConfig(type="nope", port=1))

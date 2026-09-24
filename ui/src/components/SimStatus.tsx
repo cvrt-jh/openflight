@@ -6,6 +6,7 @@ const DISPLAY_NAMES: Record<string, string> = {
   gspro: 'GSPro',
   opengolfsim: 'OpenGolfSim',
   partee: 'PAR-TEE',
+  'openflight-range': 'OpenFlight Range',
 };
 
 // Map a connection state to a visual severity bucket.

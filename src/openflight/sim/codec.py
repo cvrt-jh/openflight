@@ -84,7 +84,14 @@ def _codec_for(cfg: "ConnectorConfig") -> Codec:
     on its Developer API (3111, which speaks OpenConnect), named "opengolfsim" so
     the UI/logs/config say OpenGolfSim rather than GSPro; PAR-TEE listens for it
     on the phone's Wi-Fi address (921), named "partee" for the same reason.
+    openflight-range uses its own codec (it also needs the flight path).
     """
+    if cfg.type == "openflight-range":
+        from openflight.range.codec import (  # pylint: disable=import-outside-toplevel
+            OpenFlightRangeCodec,
+        )
+
+        return OpenFlightRangeCodec(device_id=cfg.device_id, units=cfg.units, name=cfg.type)
     if cfg.type not in ("gspro", "opengolfsim", "partee"):
         raise ValueError(f"unknown simulator connector type: {cfg.type!r}")
     from openflight.gspro.codec import GSProCodec  # pylint: disable=import-outside-toplevel
