@@ -42,8 +42,9 @@ covers setup specific to OpenFlight Range.
    ```
    The header **OpenFlight Range** pill should turn **green**.
 4. **Hit a shot.** The range draws the flight and shows the shot card. With
-   debug mode on, the "Sent to OpenFlight Range" panel shows the values sent
-   with measured/estimated badges.
+   debug mode on, the "Sent to OpenFlight Range" panel shows the resolved
+   values with measured/estimated badges. Its spin is the resolver's value; the
+   range receives the spin that produced the drawn flight, which can differ.
 
 ## Protocol
 
@@ -69,10 +70,12 @@ Unknown fields are ignored.
   the spin that produced that flight. `sources.spin` is `measured` only when
   that spin was measured and the resolver's provenance for total spin is
   `measured`; otherwise it is `estimated`.
-- **Shots without a flight.** When there is no ballistic flight (no vertical
-  launch angle, or ballistics disabled), the shot carries the committed carry
-  and no `points` (and no `landing`); `apex_ft`, `offline_yd` and
-  `flight_time_s` are `null`.
+- **Shots without a flight.** When there is no ballistic flight (OpenFlight
+  started with `--no-ballistics`, or mock mode), the shot carries the committed
+  carry and no `points` (and no `landing`); `apex_ft`, `offline_yd` and
+  `flight_time_s` are `null`. Mock mode (`--mock`) never runs the ballistic
+  simulator, so every mock shot arrives without a flight path; hit real shots
+  to see ball flight.
 - **Liveness.** OpenFlight sends a `heartbeat` every 5 s. The range drops a
   connection from which no bytes arrived for 15 s ("no data for 15 s") and the
   connector reconnects with backoff.
@@ -83,7 +86,7 @@ Unknown fields are ignored.
   `host:port`. Check that OpenFlight Range is running, that `sim.json` has the
   IP the range shows, that 3200 isn't firewalled on the PC, and that you
   launched with `--sim`. OpenFlight retries automatically with backoff.
-- **Ball drawn with "no flight path":** the shot had no vertical launch angle
-  (or ballistics were off), so OpenFlight sent the committed carry from the
-  per-club table without a path. Check the angle radar and the
-  `sim_send` entries in the session log.
+- **Ball drawn with "no flight path":** the ballistic simulator did not run for
+  the shot (OpenFlight started with `--no-ballistics`, or in mock mode), so
+  OpenFlight sent the committed carry without a path. Check the launch flags
+  and the `sim_send` entries in the session log.

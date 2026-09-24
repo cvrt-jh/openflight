@@ -44,7 +44,7 @@ cp config/sim.example.json config/sim.json
 | `host`, `port` | Where the simulator is listening (default port: `gspro` 921, `opengolfsim` 3111, `partee` 921, `openflight-range` 3200) |
 | `device_id` | Identifier the simulator displays |
 | `units` | `Yards` or `Meters` (GSPro, OpenFlight Range) |
-| `heartbeat_interval_s` | Keepalive cadence in seconds (default 5; OpenFlight Range drops a connection that is silent for 15 s) |
+| `heartbeat_interval_s` | Keepalive cadence in seconds (default 5). The heartbeat is sent only after this long with nothing else sent, so the worst-case silence is about twice the interval; keep it at or below 7 s for OpenFlight Range, which drops a connection that is silent for 15 s |
 
 Enable connectors at runtime with `--sim`. See
 [simulator connectors](../using/simulator/index.md).

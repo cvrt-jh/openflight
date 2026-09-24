@@ -144,8 +144,9 @@ errors the same way regardless of simulator.
    club-mapping test. The shared transport/resolver are already covered.
 6. **Docs.** Add `docs/simulator/<sim>.md` and link it from this page.
 
-You do **not** touch the transport, the resolver, the server fan-out, or the
-config loader — that's the point of the abstraction.
+You do **not** touch the transport, the resolver (a codec that needs the
+committed flight reads `ResolvedShot.flight`, which it already passes through),
+the server fan-out, or the config loader: that's the point of the abstraction.
 
 ## Session logging
 
