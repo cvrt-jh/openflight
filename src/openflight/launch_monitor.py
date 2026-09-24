@@ -15,7 +15,7 @@ from .clubs.physics import get_club_physics
 from .ops243 import SpeedReading
 
 if TYPE_CHECKING:
-    from openflight.ballistics import CommittedFlight
+    from .ballistics import CommittedFlight
 
 # Spin confidence threshold for "high" quality — used across modules.
 # Measured spin is trusted for physics simulation only above this level.

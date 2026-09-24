@@ -3344,6 +3344,8 @@ def _finalize_shot_detected(
 
     # Forward to simulator connectors (optional)
     _forward_shot_to_simulators(shot)
+    # The trajectory is only needed for the send; the session keeps every Shot.
+    shot.committed_flight = None
 
     # Debug logging (optional)
     if debug_mode:

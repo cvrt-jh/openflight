@@ -28,9 +28,9 @@ _RANGE_FIELDS = ["ball_speed", "vla", "hla", "total_spin", "spin_axis", "carry",
 
 
 def _line(message: dict) -> bytes:
-    # allow_nan=False is a backstop: _sanitize() below strips every non-finite
+    # allow_nan=False is a backstop: _sanitize_scalars() strips every non-finite
     # scalar and drops points/landing on a non-finite trajectory point, so this
-    # should never actually raise. If it does, that is a bug in _sanitize().
+    # should never actually raise. If it does, that is a bug in _sanitize_scalars().
     return (json.dumps(message, separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
 
 
@@ -38,13 +38,13 @@ def _is_finite(value) -> bool:
     return not (isinstance(value, float) and not math.isfinite(value))
 
 
-def _sanitize_scalars(obj, shot_number: int, sanitized: list) -> None:
+def _sanitize_scalars(obj, sanitized: list) -> None:
     """Recursively replace any non-finite float in obj's dict values with None."""
     if isinstance(obj, dict):
         for key, value in obj.items():
             if isinstance(value, dict):
-                _sanitize_scalars(value, shot_number, sanitized)
-            elif isinstance(value, float) and not math.isfinite(value):
+                _sanitize_scalars(value, sanitized)
+            elif not _is_finite(value):
                 obj[key] = None
                 sanitized.append(key)
 
@@ -132,14 +132,10 @@ class OpenFlightRangeCodec:
                 "speed_mps": round(flight.trajectory.landing_speed_mph * MPH_TO_MPS, 2),
                 "angle_deg": round(flight.trajectory.landing_angle_deg, 1),
             }
-        # No special case for result.carry_yd: if resolved.carry_yards is itself
-        # non-finite, this sweep sends it as null on purpose. The range treats a
-        # null carry as a protocol warning, visible on the HUD, which is the right
-        # outcome here - carry normally comes straight from the committed
-        # simulate() result or the resolver's fallback table, so a non-finite
-        # value here means the physics broke, not that a field is merely unknown.
+        # A non-finite carry is sent as null on purpose: the range shows a null
+        # carry as a HUD warning, and here it means the physics broke.
         sanitized_keys: List[str] = []
-        _sanitize_scalars(message, resolved.shot_number, sanitized_keys)
+        _sanitize_scalars(message, sanitized_keys)
         if sanitized_keys:
             logger.warning(
                 "[sim] shot %s had non-finite value(s) in %s; sent as null",

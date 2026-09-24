@@ -113,6 +113,10 @@ def test_points_are_metres_in_protocol_frame_and_land_at_carry():
     last = pts[-1]
     assert last[1] == pytest.approx(msg["result"]["carry_yd"] * YD_TO_M, abs=0.05)
     assert last[2] == pytest.approx(0.0, abs=0.01)
+    assert msg["landing"] == {
+        "speed_mps": round(flight.trajectory.landing_speed_mph * 0.44704, 2),
+        "angle_deg": round(flight.trajectory.landing_angle_deg, 1),
+    }
 
 
 def test_height_is_protocol_y_and_matches_apex():
@@ -217,9 +221,6 @@ def test_finite_shot_produces_strict_json():
 
 
 def test_nonfinite_carry_is_sent_as_null_on_purpose(caplog):
-    # A non-finite carry means the physics broke, not that the field is unknown;
-    # the sanitizer sends it as null on purpose so the range surfaces a visible
-    # HUD warning rather than silently dropping the whole shot.
     resolved = _resolved(_flight(), carry_yards=float("nan"))
     with caplog.at_level("WARNING"):
         raw = OpenFlightRangeCodec().build_shot(resolved)
