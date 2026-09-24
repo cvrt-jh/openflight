@@ -7,12 +7,16 @@ Protocol: docs/using/simulator/openflight-range.md.
 """
 
 import json
+import logging
+import math
 import time
 import uuid
 from typing import List, Optional
 
 from openflight import __version__
 from openflight.sim.types import InboundEvent, ResolvedShot
+
+logger = logging.getLogger(__name__)
 
 PROTOCOL_VERSION = 1
 YD_TO_M = 0.9144
@@ -24,7 +28,25 @@ _RANGE_FIELDS = ["ball_speed", "vla", "hla", "total_spin", "spin_axis", "carry",
 
 
 def _line(message: dict) -> bytes:
-    return (json.dumps(message, separators=(",", ":")) + "\n").encode("utf-8")
+    # allow_nan=False is a backstop: _sanitize() below strips every non-finite
+    # scalar and drops points/landing on a non-finite trajectory point, so this
+    # should never actually raise. If it does, that is a bug in _sanitize().
+    return (json.dumps(message, separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
+
+
+def _is_finite(value) -> bool:
+    return not (isinstance(value, float) and not math.isfinite(value))
+
+
+def _sanitize_scalars(obj, shot_number: int, sanitized: list) -> None:
+    """Recursively replace any non-finite float in obj's dict values with None."""
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if isinstance(value, dict):
+                _sanitize_scalars(value, shot_number, sanitized)
+            elif isinstance(value, float) and not math.isfinite(value):
+                obj[key] = None
+                sanitized.append(key)
 
 
 class OpenFlightRangeCodec:
@@ -104,12 +126,20 @@ class OpenFlightRangeCodec:
             },
             "result": _result(resolved, flight),
         }
-        if flight is not None:
+        if flight is not None and _trajectory_is_finite(flight.trajectory):
             message["points"] = _points(flight.trajectory)
             message["landing"] = {
                 "speed_mps": round(flight.trajectory.landing_speed_mph * MPH_TO_MPS, 2),
                 "angle_deg": round(flight.trajectory.landing_angle_deg, 1),
             }
+        sanitized_keys: List[str] = []
+        _sanitize_scalars(message, resolved.shot_number, sanitized_keys)
+        if sanitized_keys:
+            logger.warning(
+                "[sim] shot %s had non-finite value(s) in %s; sent as null",
+                resolved.shot_number,
+                sorted(set(sanitized_keys)),
+            )
         return _line(message)
 
 
@@ -129,3 +159,16 @@ def _points(trajectory) -> list:
         [round(p.t, 3), round(p.x * YD_TO_M, 3), round(p.z * YD_TO_M, 3), round(p.y * YD_TO_M, 3)]
         for p in trajectory.points
     ]
+
+
+def _trajectory_is_finite(trajectory) -> bool:
+    """False if any trajectory point, or a summary field, is NaN/inf.
+
+    A degenerate point can't be sanitized field-by-field the way scalar shot
+    fields are (a null x/y/z would draw a broken path), so the whole points
+    array (and the landing summary derived from the same run) is omitted.
+    """
+    for p in trajectory.points:
+        if not (_is_finite(p.t) and _is_finite(p.x) and _is_finite(p.y) and _is_finite(p.z)):
+            return False
+    return _is_finite(trajectory.landing_speed_mph) and _is_finite(trajectory.landing_angle_deg)
