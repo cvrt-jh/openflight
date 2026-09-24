@@ -122,3 +122,28 @@ def test_carry_falls_back_to_table_when_nothing_committed():
     assert resolve_shot(shot, PlayerState()).carry_yards == pytest.approx(
         shot.estimated_carry_yards
     )
+
+
+def test_resolved_shot_carries_the_committed_flight():
+    from openflight.ballistics import CommittedFlight, LaunchConditions, simulate
+
+    conditions = LaunchConditions(
+        ball_speed_mph=120.0,
+        launch_angle_v=18.0,
+        launch_angle_h=0.0,
+        spin_rpm=6000.0,
+        spin_axis_deg=0.0,
+        spin_source="measured",
+    )
+    flight = CommittedFlight(conditions=conditions, trajectory=simulate(conditions))
+    shot = _shot(launch_angle_vertical=18.0)
+    shot.committed_flight = flight
+
+    resolved = resolve_shot(shot, PlayerState())
+
+    assert resolved.flight is flight
+
+
+def test_resolved_shot_without_committed_flight_has_none():
+    resolved = resolve_shot(_shot(), PlayerState())
+    assert resolved.flight is None

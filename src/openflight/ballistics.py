@@ -127,6 +127,18 @@ class Trajectory:
         return self.carry_yards + rollout
 
 
+@dataclass
+class CommittedFlight:
+    """The launch conditions and RK4 trajectory behind a shot's committed carry.
+
+    Finalization keeps this so simulator connectors that draw the ball flight
+    (openflight-range) use exactly the path and spin the kiosk's carry came from.
+    """
+
+    conditions: LaunchConditions
+    trajectory: Trajectory
+
+
 def resolve_launch(shot: Shot) -> Optional[LaunchConditions]:
     """
     Produce committed launch conditions from a shot.

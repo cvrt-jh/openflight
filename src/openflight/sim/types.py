@@ -9,9 +9,12 @@ import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from openflight.clubs import ClubType
+
+if TYPE_CHECKING:
+    from openflight.ballistics import CommittedFlight
 
 # GSPro parses ShotNumber as a signed 32-bit int; a larger value overflows it and
 # the shot is rejected with 501 "Bad format". Keep every ShotNumber at or below
@@ -114,6 +117,9 @@ class ResolvedShot:
     club: ClubType
     club_speed_mph: Optional[float] = None  # None => no club-speed data
     provenance: Dict[str, str] = field(default_factory=dict)
+    # Launch conditions + trajectory behind carry_yards, when the ballistic
+    # simulator produced it. Codecs that draw the flight use it; others ignore it.
+    flight: Optional["CommittedFlight"] = None
 
     def as_values(self) -> Dict[str, Optional[float]]:
         """Logical field -> value map (keys match ``provenance``) for the UI."""

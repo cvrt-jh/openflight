@@ -8,11 +8,14 @@ RollingBufferMonitor and the Flask server.
 import statistics
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from .clubs import ClubType
 from .clubs.physics import get_club_physics
 from .ops243 import SpeedReading
+
+if TYPE_CHECKING:
+    from openflight.ballistics import CommittedFlight
 
 # Spin confidence threshold for "high" quality — used across modules.
 # Measured spin is trusted for physics simulation only above this level.
@@ -198,6 +201,7 @@ class Shot:
         mode: Shot source — "streaming", "rolling-buffer", or "mock"
         readings_data: Serialized readings for session logging
         camera_replay: Public replay metadata for a matched high-speed capture
+        committed_flight: Launch conditions + trajectory behind carry_spin_adjusted
     """
 
     ball_speed_mph: float
@@ -247,6 +251,9 @@ class Shot:
     profile_name: str = ""
     readings_data: Optional[list] = None
     camera_replay: Optional[dict] = None
+    # Launch conditions + trajectory behind carry_spin_adjusted; set only when
+    # finalization ran the ballistic simulator. Transient: not in to_dict().
+    committed_flight: Optional["CommittedFlight"] = None
     angle_source: Optional[str] = None  # "radar", "camera", "estimated", or None
     club_angle_deg: Optional[float] = None  # Club angle of attack from K-LD7 (vertical)
     club_path_deg: Optional[float] = None  # Club path: IWR6843, or K-LD7 (deprecated, horizontal)

@@ -24,7 +24,7 @@ from flask import Flask, Response, jsonify, request, send_file, send_from_direct
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
-from .ballistics import resolve_launch, simulate
+from .ballistics import CommittedFlight, resolve_launch, simulate
 from .clubs import ClubType
 from .clubs.physics import (
     SHOT_SIMULATION_DEFAULTS,
@@ -3247,6 +3247,7 @@ def _finalize_shot_detected(
         if conditions is not None:
             trajectory = simulate(conditions)
             shot.carry_spin_adjusted = trajectory.carry_yards
+            shot.committed_flight = CommittedFlight(conditions=conditions, trajectory=trajectory)
             logger.info(
                 "[SERVER] Ballistic carry: %.0f yds (spin: %.0f rpm, source: %s)",
                 shot.carry_spin_adjusted,
@@ -3254,6 +3255,7 @@ def _finalize_shot_detected(
                 conditions.spin_source,
             )
         else:
+            shot.committed_flight = None
             has_reliable_spin = (
                 shot.spin_rpm
                 and shot.spin_rpm > 0

@@ -144,4 +144,5 @@ def resolve_shot(shot: Shot, player_state: PlayerState) -> ResolvedShot:
         club=shot.club,
         club_speed_mph=club_speed,
         provenance=provenance,
+        flight=shot.committed_flight,
     )

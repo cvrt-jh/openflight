@@ -4730,3 +4730,35 @@ class TestBallisticCarryPrecedence:
         resolved = server_module.resolve_shot(forwarded[0], server_module.SimPlayerState())
         assert resolved.carry_yards == pytest.approx(shot.carry_spin_adjusted)
         assert resolved.carry_yards > 135.0
+
+    def test_finalization_keeps_the_committed_flight(self, monkeypatch):
+        monkeypatch.setattr(server_module, "ballistics_enabled", True)
+        shot = self._shot(launch_angle=19.1, prefilled_carry=None)
+
+        server_module._finalize_shot_detected(shot, emit_event="shot")
+
+        flight = shot.committed_flight
+        assert flight is not None
+        assert flight.trajectory.carry_yards == pytest.approx(shot.carry_spin_adjusted)
+        assert flight.conditions == server_module.resolve_launch(shot)
+        assert len(flight.trajectory.points) > 10
+
+    def test_table_fallback_has_no_committed_flight(self, monkeypatch):
+        monkeypatch.setattr(server_module, "ballistics_enabled", True)
+        monkeypatch.setattr(server_module, "_ensure_user_facing_launch_angles", lambda _shot: None)
+        shot = self._shot(launch_angle=None, prefilled_carry=None)
+
+        server_module._finalize_shot_detected(shot, emit_event="shot")
+
+        assert shot.carry_spin_adjusted is not None
+        assert shot.committed_flight is None
+
+    def test_committed_flight_is_never_serialized(self, monkeypatch):
+        monkeypatch.setattr(server_module, "ballistics_enabled", True)
+        shot = self._shot(launch_angle=19.1, prefilled_carry=None)
+        server_module._finalize_shot_detected(shot, emit_event="shot")
+        assert shot.committed_flight is not None
+
+        assert "committed_flight" not in shot.to_dict()
+        assert "committed_flight" not in server_module.shot_to_dict(shot)
+        assert "trajectory" not in json.dumps(shot.to_dict())
