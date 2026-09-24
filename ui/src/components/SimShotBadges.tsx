@@ -5,6 +5,7 @@ const DISPLAY_NAMES: Record<string, string> = {
   gspro: 'GSPro',
   opengolfsim: 'OpenGolfSim',
   partee: 'PAR-TEE',
+  'openflight-range': 'OpenFlight Range',
 };
 
 // Human labels for the logical field keys shared by all connectors.

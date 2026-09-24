@@ -40,4 +40,10 @@ describe('SimShotBadges', () => {
     expect(html).toContain('Sent to OpenGolfSim');
     expect(html).toContain('Sent to PAR-TEE');
   });
+
+  it('names the OpenFlight Range connector', () => {
+    const range: SimShotInfo = { ...gsproShot, target: 'openflight-range', shot_number: 5 };
+    const html = renderToString(<SimShotBadges latestSimShots={{ 'openflight-range': range }} />);
+    expect(html).toContain('Sent to OpenFlight Range');
+  });
 });
