@@ -35,9 +35,11 @@ simulator. For setting up a specific simulator, see its page above.
      ]
    }
    ```
-   A connector's `type` is the *product*. All three ride the shared OpenConnect
-   V1 codec and differ only in name and default port (GSPro 921, OpenGolfSim's
-   Developer API 3111, PAR-TEE 921).
+   A connector's `type` is the *product*. These three ride the shared
+   OpenConnect V1 codec and differ only in name and default port (GSPro 921,
+   OpenGolfSim's Developer API 3111, PAR-TEE 921). `openflight-range` (default
+   port 3200) has its own codec because it also sends the flight path; see
+   [OpenFlight Range](openflight-range.md).
 2. **Enable the feature at launch with `--sim`** (off by default). Connectors
    marked `enabled` in the file then come up:
    ```bash
@@ -79,7 +81,7 @@ the parts that are **specific to one protocol**:
 | Connection state, player state, inbound event types, resolved shot | `sim/types.py` | shared |
 | Connector = codec + transport, and the codec registry | `sim/codec.py` | shared |
 | Config (`config/sim.json` + CLI merge) | `sim/config.py` | shared |
-| **Wire format**: serialize a shot, parse inbound messages, heartbeat | `gspro/codec.py`, `opengolfsim/codec.py` | **per-sim** |
+| **Wire format**: serialize a shot, parse inbound messages, heartbeat | `gspro/codec.py`, `opengolfsim/codec.py`, `range/codec.py` | **per-sim** |
 
 The key idea: two simulators differ only in their **wire format** and their
 **inbound message shapes**. Everything else — connecting, reconnecting,

@@ -66,7 +66,9 @@ Unknown fields are ignored.
 - **Flight path.** `points` is the committed trajectory, one point per
   simulator sample (currently 50 ms), in **metres** in the protocol frame:
   **x downrange, y up, z to the right**, origin at the ball. `ball.spin_rpm` is
-  the spin that produced that flight.
+  the spin that produced that flight. `sources.spin` is `measured` only when
+  that spin was measured and the resolver's provenance for total spin is
+  `measured`; otherwise it is `estimated`.
 - **Shots without a flight.** When there is no ballistic flight (no vertical
   launch angle, or ballistics disabled), the shot carries the committed carry
   and no `points` (and no `landing`); `apex_ft`, `offline_yd` and
