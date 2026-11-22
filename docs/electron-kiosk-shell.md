@@ -19,7 +19,7 @@ carried a few risks an Electron shell removes:
 | Rendering engine version | Whatever `apt` installed/upgraded on that Pi — can silently drift between units or after an OS update | Pinned in `ui/package-lock.json` (`electron@44.1.0` today), identical across every Pi until deliberately bumped |
 | Kiosk lockdown | `--kiosk` behaves differently across Chromium, Chrome, and Firefox; Firefox's kiosk mode in particular is looser (menu/shortcuts still reachable) | One `BrowserWindow` with `kiosk: true`, no application menu, and `setWindowOpenHandler` denying any popup — the same guarantees everywhere |
 | Startup noise | Chromium's "restore previous session" / crash bubbles needed extra flags (`--disable-session-crashed-bubble`) to suppress | Electron has no Chromium session-restore prompt to suppress. Its **default session still persists** under the app `userData` directory (`~/.config/openflight-ui` on Linux) — [Session](https://www.electronjs.org/docs/latest/api/session), [app.getPath('userData')](https://www.electronjs.org/docs/latest/api/app#appgetpathname). That is a *different* profile from system Chromium (`~/.config/chromium` / `chromium-browser`) |
-| Maintenance surface | A 4-branch `if/elif` detection ladder to keep working across Raspberry Pi OS Bookworm/Bullseye, Lite/Desktop images | One binary, one launch path; `npm ci` makes the exact runtime reproducible in CI the same way any other dependency is |
+| Maintenance surface | A 4-branch `if/elif` detection ladder to keep working across Raspberry Pi OS Bookworm/Bullseye, Lite/Desktop images | One binary, one launch path; `pnpm install --frozen-lockfile` makes the exact runtime reproducible in CI the same way any other dependency is |
 | Extensibility | A browser tab is sandboxed from the OS — no filesystem, process, or native API access | The Electron **main process** is a regular Node.js process with full OS access, which is what makes [self-updating](#auto-updates-future-work) possible at all |
 
 The old detection ladder is kept as a fallback (`launch_kiosk_browser` still
@@ -28,7 +28,7 @@ missing), so a Pi that hasn't installed Electron doesn't lose its kiosk
 entirely — it just loses the guarantees above until Electron is installed.
 
 `start-kiosk.sh` builds `ui/dist` only when that directory is missing. If the
-UI is already built but Electron is not installed, it *tries* `npm install`
+UI is already built but Electron is not installed, it *tries* `pnpm install`
 when Node.js is 22.12+. Old Node, an offline Pi, or a failed install logs a
 warning and continues to the Chromium fallback instead of aborting startup.
 
@@ -86,7 +86,7 @@ different mechanisms.
 
 Electron loads a URL, not a bundled copy of `ui/dist`. Whatever Flask is
 currently serving is what the window shows. So once a Pi has pulled a new
-`ui/dist` (via the existing `git pull && npm run build` flow in
+`ui/dist` (via the existing `git pull && pnpm run build` flow in
 [splash-screen.md](setup/splash-screen.md#updating-an-existing-pi)) and the
 service restarts, the Electron window shows the new UI on its next launch —
 no Electron-specific update logic needed for this layer. This is already
@@ -95,13 +95,13 @@ true today.
 ### 2. The Electron shell itself
 
 `electron` is a normal `devDependency` in `ui/package.json`. Bumping its
-version is a normal dependency bump: change the version, `npm install`,
+version is a normal dependency bump: change the version, `pnpm install`,
 commit the updated lockfile, `git pull` on each Pi. No runtime auto-update
 machinery is needed for this either, as long as updates continue to arrive
 through `git pull` + reinstall rather than an out-of-band download.
 
 Installing that package (not running the Electron binary) needs **Node.js
-22.12+** on the Pi. Node 20 prints `npm WARN EBADENGINE` for `electron@44`
+22.12+** on the Pi. Node 20 prints an unsupported-engine warning for `electron@44`
 and its `@electron/get` helper. See the Node install step in
 [Raspberry Pi setup](setup/raspberry-pi.md).
 
@@ -119,7 +119,7 @@ action, via a `contextBridge` preload script) does the same thing an
 operator does by hand today:
 
 1. `git fetch` and compare `HEAD` against `origin/<branch>`.
-2. If behind: `git pull`, `uv sync`, `npm run build` (in `ui/`).
+2. If behind: `git pull`, `uv sync`, `pnpm run build` (in `ui/`).
 3. Decide how to apply it:
    - Content-only change (`ui/` touched, `ui/electron/` and
      `ui/package.json`'s `electron` version untouched) → `win.loadURL()`
@@ -141,7 +141,7 @@ Things to get right if this is built:
   network — this must stay a main-process-only action, not a socket event
   or HTTP endpoint, so a device on the same LAN can't trigger arbitrary
   `git pull`/`uv sync` execution on the Pi.
-- **Partial-failure safety:** a `git pull` that succeeds but an `npm run
+- **Partial-failure safety:** a `git pull` that succeeds but a `pnpm run
   build` that fails should not leave the Pi worse off than before — keep
   the previous `ui/dist` until the new build succeeds (e.g. build to a
   temp directory and swap), and skip the restart on build failure.
@@ -175,7 +175,7 @@ project:
 
 **Recommendation:** start with (A) if/when self-updating is prioritized. It
 matches the fleet's actual shape (Pis you `git pull` on, not an app store
-audience), reuses infrastructure that already exists (`uv sync`, `npm run
+audience), reuses infrastructure that already exists (`uv sync`, `pnpm run
 build`, the systemd unit), and doesn't require adopting a packaging and
 release pipeline before there's a concrete need for one. Revisit (B) only if
 OpenFlight starts distributing prebuilt images to people who don't run `git

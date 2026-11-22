@@ -17,8 +17,8 @@ Runs Vite plus a Node Socket.IO mock on port `8080` — no Python, hardware, or
 `uv` required:
 
 ```bash
-npm install
-npm run dev:mock
+pnpm install
+pnpm run dev:mock
 ```
 
 Open `http://localhost:5173`. Use **Simulate** to generate shots. The mock
@@ -36,8 +36,8 @@ scripts/start-kiosk.sh --mock
 Then in `ui/`:
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 See the [root README](../README.md#getting-started) for full-stack options.
@@ -47,25 +47,25 @@ backend is at `http://localhost:8080`. Point it elsewhere with
 `VITE_SOCKET_URL`:
 
 ```bash
-VITE_SOCKET_URL="http://localhost:8081" npm run dev
+VITE_SOCKET_URL="http://localhost:8081" pnpm run dev
 ```
 
 `/api/*` requests from the Vite origin are proxied to `http://localhost:8080`
-(so shutdown works under `npm run dev` / `dev:mock`).
+(so shutdown works under `pnpm run dev` / `dev:mock`).
 
 ## Scripts
 
 | Script                 | Description                                  |
 | ---------------------- | -------------------------------------------- |
-| `npm run dev`          | Dev server with hot reload (needs a backend) |
-| `npm run dev:mock`     | Vite + Node mock backend on port 8080        |
-| `npm run mock-server`  | Node mock Socket.IO server alone             |
-| `npm run build`        | Type-check and build the production bundle   |
-| `npm run preview`      | Serve the production build locally           |
-| `npm run lint`         | ESLint                                       |
-| `npm run test`         | Vitest unit tests                            |
-| `npm run format`       | Format `src/` with Prettier                  |
-| `npm run format:check` | Check formatting without writing             |
+| `pnpm run dev`          | Dev server with hot reload (needs a backend) |
+| `pnpm run dev:mock`     | Vite + Node mock backend on port 8080        |
+| `pnpm run mock-server`  | Node mock Socket.IO server alone             |
+| `pnpm run build`        | Type-check and build the production bundle   |
+| `pnpm run preview`      | Serve the production build locally           |
+| `pnpm run lint`         | ESLint                                       |
+| `pnpm run test`         | Vitest unit tests                            |
+| `pnpm run format`       | Format `src/` with Prettier                  |
+| `pnpm run format:check` | Check formatting without writing             |
 
 ## How the UI connects
 
@@ -80,7 +80,7 @@ The app is entirely client-side. Everything flows through one socket connection.
   sends commands like `set_club`, `clear_session`, `simulate_shot`, and
   `set_camera_capture_settings`. Read it before assuming what the
   backend emits. **`mock-server/`** implements that contract in Node for
-  `npm run dev:mock`.
+  `pnpm run dev:mock`.
 - **State** lives in `stores/` (Zustand: shots, system, camera, debug, profiles, …).
 - **Shutdown** posts to `/api/shutdown` to stop the connected backend (stubbed
   as a no-op by the Node mock).
@@ -162,7 +162,7 @@ is stored in `localStorage` under `openflight.locale:v1`.
    - Add `{ id, nativeName, htmlLang }` to `LOCALES` (`nativeName` is the
      language’s own name, shown in the dropdown).
    - Import the catalog and add it to `catalogs`.
-4. Run `npm test` — a catalog that drifts from English keys fails.
+4. Run `pnpm test` — a catalog that drifts from English keys fails.
 
 Do not translate profile names, club tile codes (`7i`, `DR`), or unit
 abbreviations (`MPH` / `YDS`).
@@ -194,10 +194,10 @@ mock-server/                 # Node Socket.IO mock for frontend-only development
 ## Troubleshooting
 
 **Socket won't connect.** Confirm a backend is running on port `8080` (or set
-`VITE_SOCKET_URL`). For UI-only work, use `npm run dev:mock`. Connection logs
+`VITE_SOCKET_URL`). For UI-only work, use `pnpm run dev:mock`. Connection logs
 come from `services/socketService.ts`.
 
-**Build fails.** `npm run build` surfaces TypeScript and bundling errors; `npm
+**Build fails.** `pnpm run build` surfaces TypeScript and bundling errors; `pnpm
 run lint` catches the rest.
 
 ---

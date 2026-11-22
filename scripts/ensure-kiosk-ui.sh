@@ -11,7 +11,7 @@ _ensure_kiosk_ui_build() {
             "Node.js is too old to build the UI" \
             "OpenFlight needs Node.js ${OPENFLIGHT_MIN_NODE} or newer (found $(openflight_node_version 2>/dev/null || echo none)). Upgrade Node, then relaunch."
     fi
-    if ! (cd "$PROJECT_DIR/ui" && npm install && npm run build); then
+    if ! (cd "$PROJECT_DIR/ui" && pnpm install && pnpm run build); then
         show_startup_failure \
             "server" \
             "OpenFlight interface build failed" \
@@ -27,12 +27,12 @@ _try_install_electron_shell() {
         warn "Node.js is too old to install Electron (need ${OPENFLIGHT_MIN_NODE}+, found $(openflight_node_version 2>/dev/null || echo none)); falling back to Chromium."
         return 0
     fi
-    if ! (cd "$PROJECT_DIR/ui" && npm install); then
+    if ! (cd "$PROJECT_DIR/ui" && pnpm install); then
         warn "Could not install Electron; falling back to Chromium if available."
         return 0
     fi
     if [ ! -x "$PROJECT_DIR/ui/node_modules/.bin/electron" ]; then
-        warn "Electron is still missing after npm install; falling back to Chromium if available."
+        warn "Electron is still missing after pnpm install; falling back to Chromium if available."
     fi
 }
 

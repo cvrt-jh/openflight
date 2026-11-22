@@ -21,10 +21,10 @@ launch_kiosk_browser() {
     if [ -x "$electron_bin" ]; then
         _launch_kiosk_process env DISPLAY=:0 OPENFLIGHT_URL="$url" "$electron_bin" "$PROJECT_DIR/ui"
     elif command -v chromium-browser &> /dev/null; then
-        warn "Electron kiosk shell not installed (run 'npm install' in ui/); falling back to chromium-browser"
+        warn "Electron kiosk shell not installed (run 'pnpm install' in ui/); falling back to chromium-browser"
         _launch_kiosk_process env DISPLAY=:0 chromium-browser --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble --password-store=basic "$url"
     elif command -v chromium &> /dev/null; then
-        warn "Electron kiosk shell not installed (run 'npm install' in ui/); falling back to chromium"
+        warn "Electron kiosk shell not installed (run 'pnpm install' in ui/); falling back to chromium"
         _launch_kiosk_process env DISPLAY=:0 chromium --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble --password-store=basic "$url"
     else
         warn "No Electron kiosk shell and no fallback browser found. Open $url manually."

@@ -29,7 +29,7 @@ Thank you for your interest in contributing to OpenFlight! This document provide
    Or manually:
    ```bash
    uv sync --group dev
-   cd ui && npm install
+   cd ui && pnpm install
    ```
 
 3. **Install pre-commit hooks**
@@ -54,7 +54,7 @@ make dev
 scripts/start-kiosk.sh --mock
 
 # Run UI development server (separate terminal)
-cd ui && npm run dev
+cd ui && pnpm run dev
 ```
 
 ## Code Quality Standards
@@ -84,8 +84,8 @@ changing visual states.
 
 ```bash
 cd ui
-npm run lint      # ESLint
-npm run build     # Type check + build
+pnpm run lint      # ESLint
+pnpm run build     # Type check + build
 ```
 
 ### Running Tests
@@ -161,7 +161,7 @@ will fail if:
    ```bash
    make test
    make lint
-   cd ui && npm run build
+   cd ui && pnpm run build
    ```
 
 5. **Manually test your change** and note what you verified by hand

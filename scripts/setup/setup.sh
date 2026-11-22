@@ -134,7 +134,7 @@ else
     exit 1
 fi
 
-# Check for Node.js (Electron 44's npm installer requires 22.12+)
+# Check for Node.js (Electron 44's installer requires 22.12+)
 # shellcheck source=../require-node.sh
 source "$SCRIPT_DIR/../require-node.sh"
 log "Checking Node.js..."
@@ -146,9 +146,9 @@ else
     exit 1
 fi
 
-# Check for npm
-if ! command -v npm &> /dev/null; then
-    error "npm not found. Please install npm"
+# Check for pnpm (Node 22+ ships corepack; `corepack enable` provides pnpm)
+if ! command -v pnpm &> /dev/null; then
+    error "pnpm not found. Run 'corepack enable' (or 'npm install -g pnpm') and re-run setup"
     exit 1
 fi
 
@@ -195,11 +195,11 @@ log "Dev dependencies installed ✓"
 # Install Node.js dependencies and build UI
 log "Installing Node.js dependencies..."
 cd ui
-npm install
+pnpm install
 log "Node.js dependencies installed ✓"
 
 log "Building UI..."
-npm run build
+pnpm run build
 log "UI built ✓"
 cd ..
 

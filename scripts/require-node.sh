@@ -1,4 +1,4 @@
-# Sourced by setup and kiosk scripts. Electron 44's npm installer requires
+# Sourced by setup and kiosk scripts. Electron 44's installer requires
 # Node 22.12+ (see ui/package.json engines and electron's own engines field).
 OPENFLIGHT_MIN_NODE="22.12.0"
 

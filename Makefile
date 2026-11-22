@@ -8,7 +8,7 @@ test:
 lint:
 	uv run ruff check src/openflight/
 	uv run pylint src/openflight/ --fail-under=9
-	cd ui && npm run lint
+	cd ui && pnpm run lint
 
 ## Auto-format Python code
 format:
@@ -21,7 +21,7 @@ dev:
 
 ## Build the React UI
 build-ui:
-	cd ui && npm install && npm run build
+	cd ui && pnpm install && pnpm run build
 
 ## Start the full application (requires hardware)
 start:
@@ -30,7 +30,7 @@ start:
 ## Install all dependencies (Python + UI)
 install:
 	uv sync --group dev
-	cd ui && npm install
+	cd ui && pnpm install
 
 ## Install pre-commit hooks
 hooks:

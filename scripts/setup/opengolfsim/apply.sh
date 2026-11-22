@@ -30,7 +30,7 @@ echo "1) Backing up app.asar -> $HOME/Downloads/app.asar.backup-$STAMP"
 cp "$ASAR" "$HOME/Downloads/app.asar.backup-$STAMP"
 
 echo "2) Extracting app.asar"
-npx --yes @electron/asar extract "$ASAR" "$WORK/src"
+pnpm dlx @electron/asar extract "$ASAR" "$WORK/src"
 
 echo "3) Applying the club-sync patch to lib/launch/api.js"
 if patch -p1 -d "$WORK/src" < "$HERE/api.js.club-sync.patch"; then
@@ -45,7 +45,7 @@ else
 fi
 
 echo "4) Repacking (keeping native .node modules unpacked)"
-npx --yes @electron/asar pack "$WORK/src" "$WORK/app.asar.new" --unpack "**/*.node"
+pnpm dlx @electron/asar pack "$WORK/src" "$WORK/app.asar.new" --unpack "**/*.node"
 
 # sanity: same native unpack set as the shipped app
 ORIG="$(cd "$RES/app.asar.unpacked" && find . -type f | sort)"

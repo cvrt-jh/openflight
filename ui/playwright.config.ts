@@ -42,7 +42,7 @@ export default defineConfig({
       env: backendEnv(),
     },
     {
-      command: `npm run dev -- --host ${HOST} --port ${PORT} --mode test`,
+      command: `pnpm run dev --host ${HOST} --port ${PORT} --mode test`,
       url: BASE_URL,
       reuseExistingServer: !process.env.CI,
       cwd: CONFIG_DIR,

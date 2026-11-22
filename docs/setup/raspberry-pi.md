@@ -40,7 +40,7 @@ The UI/Electron kiosk shell needs **Node.js 22.12 or newer** to *install*
 Electron. Raspberry Pi OS `apt` Node is often 18 or 20 and will print
 `EBADENGINE` (or fail) for `electron@44`. A Pi that already has `ui/dist` can
 still start: `start-kiosk.sh` falls back to system Chromium until Node is
-upgraded and `npm install` in `ui/` succeeds. Install Node 22 LTS before a
+upgraded and `pnpm install` in `ui/` (enable pnpm with `corepack enable`) succeeds. Install Node 22 LTS before a
 first UI build or to actually run the Electron shell:
 
 ```bash

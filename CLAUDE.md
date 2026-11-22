@@ -114,9 +114,9 @@ uv run ruff format --check src/openflight/
 Kiosk / touch conventions for agents: see `ui/AGENTS.md`.
 
 ```bash
-npm run dev      # Development server with hot reload
-npm run build    # Production build
-npm run lint     # ESLint
+pnpm run dev      # Development server with hot reload
+pnpm run build    # Production build
+pnpm run lint     # ESLint
 ```
 
 ### Radar Setup (One-Time)

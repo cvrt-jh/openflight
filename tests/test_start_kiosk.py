@@ -253,7 +253,7 @@ def test_launcher_reports_distinct_failures_and_waits_for_dismissal():
     assert 'while [ ! -f "$STARTUP_DISMISS_FILE" ]' in script
     assert 'uv sync "${UV_SYNC_ARGS[@]}"' in script
     assert "ensure_kiosk_ui" in script
-    assert "npm run build" in ensure_ui
+    assert "pnpm run build" in ensure_ui
 
 
 def test_kiosk_shell_scripts_use_unix_newlines():
@@ -297,7 +297,7 @@ def test_launch_kiosk_browser_prefers_the_electron_shell():
 
 
 def test_launch_kiosk_browser_still_falls_back_without_electron():
-    """A Pi that hasn't run `npm install` yet must not lose its kiosk entirely."""
+    """A Pi that hasn't run `pnpm install` yet must not lose its kiosk entirely."""
     launcher = _launcher_function()
 
     assert "chromium-browser --kiosk" in launcher
@@ -357,7 +357,7 @@ def _run_ensure_kiosk_ui(
     *,
     node_version: str,
     has_dist: bool,
-    npm_exit: int,
+    pnpm_exit: int,
     has_node_modules: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     repo_scripts = REPO_ROOT / "scripts"
@@ -377,18 +377,18 @@ def _run_ensure_kiosk_ui(
 
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
-    npm_called = tmp_path / "npm-called"
+    pnpm_called = tmp_path / "pnpm-called"
     _write_executable(
         bin_dir / "node",
         f"#!/usr/bin/env bash\necho 'v{node_version}'\n",
     )
     _write_executable(
-        bin_dir / "npm",
+        bin_dir / "pnpm",
         "\n".join(
             [
                 "#!/usr/bin/env bash",
-                f"printf '%s\\n' \"$*\" >> {_bash_path(npm_called)}",
-                f"exit {npm_exit}",
+                f"printf '%s\\n' \"$*\" >> {_bash_path(pnpm_called)}",
+                f"exit {pnpm_exit}",
                 "",
             ]
         ),
@@ -443,23 +443,23 @@ def test_existing_ui_continues_when_node_is_too_old_to_install_electron(tmp_path
         node_version="20.19.0",
         has_dist=True,
         has_node_modules=True,
-        npm_exit=1,
+        pnpm_exit=1,
     )
 
     combined = result.stdout + result.stderr
     assert result.returncode == 0, combined
     assert "CONTINUED" in result.stdout
     assert "FAILURE" not in combined
-    assert not (tmp_path / "npm-called").exists()
+    assert not (tmp_path / "pnpm-called").exists()
 
 
-def test_existing_ui_bundle_skips_npm_when_dependencies_are_missing(tmp_path):
-    """A built UI with no node_modules must start offline instead of calling npm."""
+def test_existing_ui_bundle_skips_pnpm_when_dependencies_are_missing(tmp_path):
+    """A built UI with no node_modules must start offline instead of calling pnpm."""
     result = _run_ensure_kiosk_ui(
         tmp_path,
         node_version="22.12.0",
         has_dist=True,
-        npm_exit=1,
+        pnpm_exit=1,
     )
 
     combined = result.stdout + result.stderr
@@ -467,39 +467,39 @@ def test_existing_ui_bundle_skips_npm_when_dependencies_are_missing(tmp_path):
     assert "CONTINUED" in result.stdout
     assert "existing UI bundle" in result.stdout
     assert "FAILURE" not in combined
-    assert not (tmp_path / "npm-called").exists()
+    assert not (tmp_path / "pnpm-called").exists()
 
 
-def test_existing_ui_continues_when_electron_npm_install_fails(tmp_path):
+def test_existing_ui_continues_when_electron_pnpm_install_fails(tmp_path):
     """A failed Electron install must not block a unit that already has ui/dist."""
     result = _run_ensure_kiosk_ui(
         tmp_path,
         node_version="22.12.0",
         has_dist=True,
         has_node_modules=True,
-        npm_exit=1,
+        pnpm_exit=1,
     )
 
     combined = result.stdout + result.stderr
     assert result.returncode == 0, combined
     assert "CONTINUED" in result.stdout
     assert "FAILURE" not in combined
-    assert (tmp_path / "npm-called").exists()
+    assert (tmp_path / "pnpm-called").exists()
 
 
-def test_missing_ui_still_fails_when_npm_install_is_unavailable(tmp_path):
+def test_missing_ui_still_fails_when_pnpm_install_is_unavailable(tmp_path):
     result = _run_ensure_kiosk_ui(
         tmp_path,
         node_version="22.12.0",
         has_dist=False,
-        npm_exit=1,
+        pnpm_exit=1,
     )
 
     combined = result.stdout + result.stderr
     assert result.returncode == 42, combined
     assert "FAILURE" in combined
     assert "CONTINUED" not in result.stdout
-    assert (tmp_path / "npm-called").exists()
+    assert (tmp_path / "pnpm-called").exists()
 
 
 def test_missing_ui_still_fails_when_node_is_too_old(tmp_path):
@@ -507,7 +507,7 @@ def test_missing_ui_still_fails_when_node_is_too_old(tmp_path):
         tmp_path,
         node_version="20.19.0",
         has_dist=False,
-        npm_exit=0,
+        pnpm_exit=0,
     )
 
     combined = result.stdout + result.stderr
